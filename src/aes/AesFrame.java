@@ -58,6 +58,7 @@ public class AesFrame extends JFrame {
         panel_1.setLayout(new GridLayout(0, 2));
         
         txtPlainText = new JTextField();
+        txtPlainText.setEditable(false);
         panel_1.add(txtPlainText);
         txtPlainText.setColumns(10);
         
@@ -72,6 +73,7 @@ public class AesFrame extends JFrame {
         panel_2.setLayout(new GridLayout(0, 2));
         
         txtKey = new JTextField();
+        txtKey.setEditable(false);
         panel_2.add(txtKey);
         txtKey.setColumns(10);
         
@@ -107,6 +109,7 @@ public class AesFrame extends JFrame {
         panel_1.setLayout(new GridLayout(0, 2));
         
         txtPlainText = new JTextField();
+        txtPlainText.setEditable(false);
         panel_1.add(txtPlainText);
         txtPlainText.setColumns(10);
         
@@ -121,6 +124,7 @@ public class AesFrame extends JFrame {
         panel_2.setLayout(new GridLayout(0, 2));
         
         txtKey = new JTextField();
+        txtKey.setEditable(false);
         panel_2.add(txtKey);
         txtKey.setColumns(10);
         
