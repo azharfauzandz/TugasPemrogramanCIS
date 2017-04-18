@@ -28,7 +28,8 @@ public class AesFrame extends JFrame {
 	private JButton btnSelectKeyChiperTxt;
 	private JTextPane txtpnPlainText;
 	private JTextPane txtpnChiperText;
-	
+	private JButton btnEncrypt;
+	private JButton btnDecrypt;
 
 	/**
 	 * Create the frame.
@@ -92,9 +93,9 @@ public class AesFrame extends JFrame {
         Panel panel_3 = new Panel();
         panel.add(panel_3);
         
-        JButton btnNewButton = new JButton("ENCRYPT");
-        btnNewButton.setBackground(new Color(255, 69, 0));
-        panel.add(btnNewButton);
+        btnEncrypt = new JButton("ENCRYPT");
+        btnEncrypt.setBackground(new Color(255, 69, 0));
+        panel.add(btnEncrypt);
         
         JLabel lblChiperText = new JLabel("Result - Chiper Text");
         panel.add(lblChiperText);
@@ -143,9 +144,9 @@ public class AesFrame extends JFrame {
         Panel panel_3 = new Panel();
         panel.add(panel_3);
         
-        JButton btnNewButton = new JButton("DECRYPT");
-        btnNewButton.setBackground(new Color(255, 69, 0));
-        panel.add(btnNewButton);
+        btnDecrypt = new JButton("DECRYPT");
+        btnDecrypt.setBackground(new Color(255, 69, 0));
+        panel.add(btnDecrypt);
         
         JLabel lblPlainText = new JLabel("Result - Plain Text");
         panel.add(lblPlainText);
@@ -237,6 +238,12 @@ public class AesFrame extends JFrame {
 		this.txtpnChiperText = txtpnChiperText;
 	}
 	
+	public JButton getBtnEncrypt() {
+		return btnEncrypt;
+	}
 	
+	public JButton getBtnDecrypt() {
+		return btnDecrypt;
+	}
 
 }

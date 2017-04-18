@@ -4,6 +4,11 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JFileChooser;
 public class AesMain {
@@ -26,6 +31,27 @@ public class AesMain {
 					/**
 					 * This code is for encryption tab
 					 */
+					
+					frame.getBtnEncrypt().addActionListener(new ActionListener() {
+						
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							System.out.println("ENCRIPTE");
+							try {
+								byte[] key = readKeyFromFile(frame.getTxtKeyPlainTxt().getText());
+								byte[] message = readFile(frame.getTxtPlainText().getText());
+								byte[] chiper = CryptoUtil.encryptAES(key, message);
+								System.out.println(chiper);
+								System.out.println(CryptoUtil.byteToString(chiper));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					});
 					
 					//Get File Plain Txt
 					frame.getBtnSelectFilePlainTxt().addActionListener(new ActionListener() {		
@@ -67,7 +93,29 @@ public class AesMain {
 						}
 					});
 					
-				} catch (Exception e) {
+					frame.getBtnDecrypt().addActionListener(new ActionListener() {
+						
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							// TODO Auto-generated method stub
+							try {
+								byte[] key = readKeyFromFile(frame.getTxtKeyChiperTxt().getText());
+								byte[] chiper = readFile(frame.getTxtChiperText().getText());
+								byte[] message = CryptoUtil.decryptAES(key, chiper);
+								System.out.println(CryptoUtil.byteToString(message));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+						}
+					});
+					
+				} 
+				catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -81,7 +129,26 @@ public class AesMain {
 	    if (returnValue == JFileChooser.APPROVE_OPTION) {
 	      selectedFile = fileChooser.getSelectedFile();
 	    }
+	    
 		return selectedFile;
 	}
 
+	public static byte[] readFile(String strPath) throws IOException{
+		Path path = Paths.get(strPath);
+		byte[] data = Files.readAllBytes(path);
+	
+		return data;
+	}
+	
+	public static byte[] readKeyFromFile(String strPath) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(strPath));
+		try {
+			return CryptoUtil.hexStringToByteArray(new String(encoded, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	
+	}
 }
