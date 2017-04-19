@@ -1,5 +1,7 @@
 package aes;
 
+import java.security.InvalidKeyException;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -10,10 +12,10 @@ public class CryptoUtil {
 	
 	public static void main(String[] args) {
 		try {
-			String asdKey = "key";
-			byte[] key = generateAESKey();
+			String asdKey = "2327DC44B69B60062CBBE9674007AE5F";
+			byte[] key = hexStringToByteArray(asdKey);
 			System.out.println(byteToString(key));
-			String asd = "vsdasdasdasdasdasdasdasdasdasd adasd ad asd as asd as das as dasd ";
+			String asd = "asd";
 			byte[] data = asd.getBytes();
 			System.out.println(byteToString(data));
 			byte[] enc = encryptAES(key, data);
@@ -45,17 +47,26 @@ public class CryptoUtil {
      }
 
 
-	public static byte[] encryptAES(byte key[], byte data[]) throws Exception {
+	public static byte[] encryptAES(byte[] key, byte[] data) throws InvalidKeyException, Exception{
+		return encryptAES(key, data, new byte[16]);
+		
+	}
+	
+	public static byte[] encryptAES(byte[] key, byte[] data, byte[] iv) throws InvalidKeyException, Exception {
             SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
             // Instantiate the cipher
             Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
-
+            
             return cipher.doFinal(data);
      }
 
-	public static byte[] decryptAES(byte key[], byte msg[]) throws Exception {
+	public static byte[] decryptAES(byte key[], byte msg[]) throws InvalidKeyException,Exception{
+		return decryptAES(key, msg, new byte[16]);
+	}
+	
+	public static byte[] decryptAES(byte key[], byte msg[], byte[] iv) throws InvalidKeyException, Exception {
             SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
             // Instantiate the cipher

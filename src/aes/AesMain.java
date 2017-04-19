@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
 
 import javax.swing.JFileChooser;
 public class AesMain {
@@ -43,7 +44,12 @@ public class AesMain {
 								byte[] chiper = CryptoUtil.encryptAES(key, message);
 								System.out.println(chiper);
 								System.out.println(CryptoUtil.byteToString(chiper));
-							} catch (IOException e) {
+							}catch (InvalidKeyException a) {
+								System.out.println("Java Security Key error : please follow this instruction http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters");
+								a.printStackTrace();
+							}
+							
+							catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (Exception e) {
@@ -103,11 +109,12 @@ public class AesMain {
 								byte[] chiper = readFile(frame.getTxtChiperText().getText());
 								byte[] message = CryptoUtil.decryptAES(key, chiper);
 								System.out.println(CryptoUtil.byteToString(message));
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
+							} catch (InvalidKeyException a) {
+								System.out.println("Java Security Key error : please follow this instruction http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters");
+								a.printStackTrace();
+							}catch (IOException e) {
 								e.printStackTrace();
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 							
