@@ -4,11 +4,13 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
 
 import javax.swing.JFileChooser;
 public class AesMain {
@@ -36,14 +38,19 @@ public class AesMain {
 						
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
-							System.out.println("ENCRIPTE");
+							System.out.println("Encrypting....");
 							try {
 								byte[] key = readKeyFromFile(frame.getTxtKeyPlainTxt().getText());
 								byte[] message = readFile(frame.getTxtPlainText().getText());
 								byte[] chiper = CryptoUtil.encryptAES(key, message);
-								System.out.println(chiper);
-								System.out.println(CryptoUtil.byteToString(chiper));
-							} catch (IOException e) {
+								frame.getTxtpnChiperText().setText(writeToFile(chiper, "encrypted.aes"));
+//								System.out.println(CryptoUtil.byteToString(chiper));
+							}catch (InvalidKeyException a) {
+								System.out.println("Java Security Key error : please follow this instruction http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters");
+								a.printStackTrace();
+							}
+							
+							catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (Exception e) {
@@ -97,17 +104,19 @@ public class AesMain {
 						
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
+							System.out.println("Decrypting....");
 							// TODO Auto-generated method stub
 							try {
 								byte[] key = readKeyFromFile(frame.getTxtKeyChiperTxt().getText());
 								byte[] chiper = readFile(frame.getTxtChiperText().getText());
 								byte[] message = CryptoUtil.decryptAES(key, chiper);
-								System.out.println(CryptoUtil.byteToString(message));
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
+								frame.getTxtpnPlainText().setText(writeToFile(message, "decrypted.aes"));
+							} catch (InvalidKeyException a) {
+								System.out.println("Java Security Key error : please follow this instruction http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters");
+								a.printStackTrace();
+							}catch (IOException e) {
 								e.printStackTrace();
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 							
@@ -149,6 +158,12 @@ public class AesMain {
 			e.printStackTrace();
 			return null;
 		}
+	}
 	
+	public static String writeToFile(byte[] data, String name) throws IOException {
+		FileOutputStream fos = new FileOutputStream(name);
+		fos.write(data);
+		fos.close();
+		return System.getProperty("user.dir")+"/"+name;
 	}
 }

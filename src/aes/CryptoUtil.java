@@ -1,5 +1,10 @@
 package aes;
 
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -10,16 +15,17 @@ public class CryptoUtil {
 	
 	public static void main(String[] args) {
 		try {
-			String asdKey = "key";
-			byte[] key = generateAESKey();
+			String asdKey = "0202020202020202020202020202020202020202020202020202020202020202";
+			byte[] key = hexStringToByteArray(asdKey);
 			System.out.println(byteToString(key));
-			String asd = "vsdasdasdasdasdasdasdasdasdasd adasd ad asd as asd as das as dasd ";
+			String asd = "asdaasdaasdaasa";
 			byte[] data = asd.getBytes();
 			System.out.println(byteToString(data));
 			byte[] enc = encryptAES(key, data);
 			System.out.println(byteToString(enc));
 			System.out.println(byteToString(decryptAES(key, enc)));
-			
+			System.out.println(byteToString(addPadding(data)));
+			System.out.println(byteToString(removePadding(addPadding(data))));
 		}
 		catch (Exception a){
 			a.printStackTrace();
@@ -45,24 +51,35 @@ public class CryptoUtil {
      }
 
 
-	public static byte[] encryptAES(byte key[], byte data[]) throws Exception {
-            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-
-            // Instantiate the cipher
-            Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
-
-            return cipher.doFinal(data);
+	public static byte[] encryptAES(byte[] key, byte[] data) throws InvalidKeyException, Exception{
+		return encryptAES(key, data, new byte[16]);
+		
+	}
+	
+	public static byte[] encryptAES(byte[] key, byte[] data, byte[] iv) throws InvalidKeyException, Exception {
+		key = setKey(key);
+		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        
+        // Instantiate the cipher
+        Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
+        
+        return cipher.doFinal(addPadding(data));
      }
 
-	public static byte[] decryptAES(byte key[], byte msg[]) throws Exception {
-            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+	public static byte[] decryptAES(byte[] key, byte[] msg) throws InvalidKeyException,Exception{
+		return decryptAES(key, msg, new byte[16]);
+	}
+	
+	public static byte[] decryptAES(byte[] key, byte[] msg, byte[] iv) throws InvalidKeyException, Exception {
+		key = setKey(key);
+		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
-            // Instantiate the cipher
-            Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
+		// Instantiate the cipher
+		Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+		cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
 
-            return cipher.doFinal(msg);
+		return removePadding(cipher.doFinal(msg));
      }
 	
 	public static byte[] hexStringToByteArray(String s) {
@@ -73,5 +90,50 @@ public class CryptoUtil {
 	                             + Character.digit(s.charAt(i+1), 16));
 	    }
 	    return data;
+	}
+	
+	private static byte[] addPadding(byte[] data) {
+		int length = data.length;
+		int padLength = 0;
+		if (length % 16 != 0 || length == 0) {
+			padLength = 16 - (length % 16);
+		}
+		byte[] afterPadding = new byte[length + padLength];
+		System.arraycopy(data, 0, afterPadding, 0, length);
+		for (int i = length; i < length+padLength; i++) {
+			afterPadding[i] = (byte) padLength;
+		}
+		return afterPadding;
+	}
+	
+	private static byte[] removePadding(byte[] data) {
+		
+		int length = data.length;
+		int padLength = (int) data[length - 1];
+		if (padLength > 16) return data;
+		byte[] afterRemoval = new byte[length - padLength];
+		boolean isPadded = true;
+		for (int i = length-1; i > length-padLength; i--) {
+			if (data[i] != padLength) {
+				isPadded = false;
+				break;
+			}
+		}
+		if (isPadded) System.arraycopy(data, 0, afterRemoval, 0, length-padLength);
+		
+		return afterRemoval;
+	}
+	
+	private static byte[] setKey(byte[] key) throws NoSuchAlgorithmException {
+		int length = key.length;
+		if (length == 16 || length == 24 || length == 32) {
+			return key;
+		} else {
+			System.out.println("Preprocessing key...");
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			byte[] newKey = sha.digest(key);
+			newKey = Arrays.copyOf(key, 16);
+			return newKey;
+		}
 	}
 }
