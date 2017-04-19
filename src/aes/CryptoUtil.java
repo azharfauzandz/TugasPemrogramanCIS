@@ -1,6 +1,9 @@
 package aes;
 
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -12,7 +15,7 @@ public class CryptoUtil {
 	
 	public static void main(String[] args) {
 		try {
-			String asdKey = "2327DC44B69B60062CBBE9674007AE5F";
+			String asdKey = "0202020202020202020202020202020202020202020202020202020202020202";
 			byte[] key = hexStringToByteArray(asdKey);
 			System.out.println(byteToString(key));
 			String asd = "asdaasdaasdaasa";
@@ -54,27 +57,29 @@ public class CryptoUtil {
 	}
 	
 	public static byte[] encryptAES(byte[] key, byte[] data, byte[] iv) throws InvalidKeyException, Exception {
-            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-
-            // Instantiate the cipher
-            Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
-            
-            return cipher.doFinal(addPadding(data));
+		key = setKey(key);
+		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        
+        // Instantiate the cipher
+        Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
+        
+        return cipher.doFinal(addPadding(data));
      }
 
-	public static byte[] decryptAES(byte key[], byte msg[]) throws InvalidKeyException,Exception{
+	public static byte[] decryptAES(byte[] key, byte[] msg) throws InvalidKeyException,Exception{
 		return decryptAES(key, msg, new byte[16]);
 	}
 	
-	public static byte[] decryptAES(byte key[], byte msg[], byte[] iv) throws InvalidKeyException, Exception {
-            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+	public static byte[] decryptAES(byte[] key, byte[] msg, byte[] iv) throws InvalidKeyException, Exception {
+		key = setKey(key);
+		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
-            // Instantiate the cipher
-            Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
+		// Instantiate the cipher
+		Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+		cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
 
-            return removePadding(cipher.doFinal(msg));
+		return removePadding(cipher.doFinal(msg));
      }
 	
 	public static byte[] hexStringToByteArray(String s) {
@@ -119,4 +124,16 @@ public class CryptoUtil {
 		return afterRemoval;
 	}
 	
+	private static byte[] setKey(byte[] key) throws NoSuchAlgorithmException {
+		int length = key.length;
+		if (length == 16 || length == 24 || length == 32) {
+			return key;
+		} else {
+			System.out.println("Preprocessing key...");
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			byte[] newKey = sha.digest(key);
+			newKey = Arrays.copyOf(key, 16);
+			return newKey;
+		}
+	}
 }
