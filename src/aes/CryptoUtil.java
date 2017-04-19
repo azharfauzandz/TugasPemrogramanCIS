@@ -13,6 +13,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoUtil {
 	
+	/**
+	 * for testing purpose only, please ignore this main method
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		try {
 			String asdKey = "0202020202020202020202020202020202020202020202020202020202020202";
@@ -33,6 +37,11 @@ public class CryptoUtil {
 		
 	}
 	
+	/**
+	 * convert bytes array to plain string hexa
+	 * @param bytes
+	 * @return
+	 */
 	public static String byteToString(byte[] bytes) {
 		StringBuffer result = new StringBuffer();
 		for (byte b : bytes) {
@@ -42,6 +51,11 @@ public class CryptoUtil {
 		return result.toString();
 	}
 	
+	/**
+	 * generate random key for aes, with 128 bit length
+	 * @return
+	 * @throws Exception
+	 */
 	public static byte[] generateAESKey() throws Exception {
              KeyGenerator kgen = KeyGenerator.getInstance("AES");
              kgen.init(128);
@@ -50,12 +64,28 @@ public class CryptoUtil {
              return skey.getEncoded();
      }
 
-
+	/**
+	 * encrypt using aes with default IV (all zero)
+	 * @param key
+	 * @param data
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws Exception
+	 */
 	public static byte[] encryptAES(byte[] key, byte[] data) throws InvalidKeyException, Exception{
 		return encryptAES(key, data, new byte[16]);
 		
 	}
 	
+	/**
+	 * encrypt using aes with given IV 
+	 * @param key
+	 * @param data
+	 * @param iv
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws Exception
+	 */
 	public static byte[] encryptAES(byte[] key, byte[] data, byte[] iv) throws InvalidKeyException, Exception {
 		key = setKey(key);
 		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
@@ -67,10 +97,27 @@ public class CryptoUtil {
         return cipher.doFinal(addPadding(data));
      }
 
+	/**
+	 * decrypt using aes with default IV (all zero)
+	 * @param key
+	 * @param msg
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws Exception
+	 */
 	public static byte[] decryptAES(byte[] key, byte[] msg) throws InvalidKeyException,Exception{
 		return decryptAES(key, msg, new byte[16]);
 	}
 	
+	/**
+	 * decrypt using aes with given IV
+	 * @param key
+	 * @param msg
+	 * @param iv
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws Exception
+	 */
 	public static byte[] decryptAES(byte[] key, byte[] msg, byte[] iv) throws InvalidKeyException, Exception {
 		key = setKey(key);
 		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
@@ -82,6 +129,11 @@ public class CryptoUtil {
 		return removePadding(cipher.doFinal(msg));
      }
 	
+	/**
+	 * convert hexa string into bytes array
+	 * @param s
+	 * @return
+	 */
 	public static byte[] hexStringToByteArray(String s) {
 	    int len = s.length();
 	    byte[] data = new byte[len / 2];
@@ -92,6 +144,11 @@ public class CryptoUtil {
 	    return data;
 	}
 	
+	/**
+	 * add padding using pcks#5 format
+	 * @param data
+	 * @return
+	 */
 	private static byte[] addPadding(byte[] data) {
 		int length = data.length;
 		int padLength = 0;
@@ -100,12 +157,18 @@ public class CryptoUtil {
 		}
 		byte[] afterPadding = new byte[length + padLength];
 		System.arraycopy(data, 0, afterPadding, 0, length);
+		//add padding into the end of data
 		for (int i = length; i < length+padLength; i++) {
 			afterPadding[i] = (byte) padLength;
 		}
 		return afterPadding;
 	}
 	
+	/**
+	 * remove padding using pcks#5 format
+	 * @param data
+	 * @return
+	 */
 	private static byte[] removePadding(byte[] data) {
 		
 		int length = data.length;
@@ -113,6 +176,7 @@ public class CryptoUtil {
 		if (padLength > 16) return data;
 		byte[] afterRemoval = new byte[length - padLength];
 		boolean isPadded = true;
+		// check if n last data is padded bit
 		for (int i = length-1; i > length-padLength; i--) {
 			if (data[i] != padLength) {
 				isPadded = false;
@@ -124,15 +188,23 @@ public class CryptoUtil {
 		return afterRemoval;
 	}
 	
+	/**
+	 * set suitable key for aes
+	 * @param key
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 */
 	private static byte[] setKey(byte[] key) throws NoSuchAlgorithmException {
 		int length = key.length;
+		//if length is 128 or 192 or 256 then the key is suitable
 		if (length == 16 || length == 24 || length == 32) {
 			return key;
 		} else {
+			// else, hash the key using sha1 and take first 128 bit
 			System.out.println("Preprocessing key...");
 			MessageDigest sha = MessageDigest.getInstance("SHA-1");
 			byte[] newKey = sha.digest(key);
-			newKey = Arrays.copyOf(key, 16);
+			newKey = Arrays.copyOf(key, 16); // take first 128 bit
 			return newKey;
 		}
 	}
