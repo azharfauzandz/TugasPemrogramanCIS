@@ -15,13 +15,14 @@ public class CryptoUtil {
 			String asdKey = "2327DC44B69B60062CBBE9674007AE5F";
 			byte[] key = hexStringToByteArray(asdKey);
 			System.out.println(byteToString(key));
-			String asd = "asd";
+			String asd = "asdaasdaasdaasa";
 			byte[] data = asd.getBytes();
 			System.out.println(byteToString(data));
 			byte[] enc = encryptAES(key, data);
 			System.out.println(byteToString(enc));
 			System.out.println(byteToString(decryptAES(key, enc)));
-			
+			System.out.println(byteToString(addPadding(data)));
+			System.out.println(byteToString(removePadding(addPadding(data))));
 		}
 		catch (Exception a){
 			a.printStackTrace();
@@ -59,7 +60,7 @@ public class CryptoUtil {
             Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
             
-            return cipher.doFinal(data);
+            return cipher.doFinal(addPadding(data));
      }
 
 	public static byte[] decryptAES(byte key[], byte msg[]) throws InvalidKeyException,Exception{
@@ -73,7 +74,7 @@ public class CryptoUtil {
             Cipher cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(new byte[16]));
 
-            return cipher.doFinal(msg);
+            return removePadding(cipher.doFinal(msg));
      }
 	
 	public static byte[] hexStringToByteArray(String s) {
@@ -85,4 +86,37 @@ public class CryptoUtil {
 	    }
 	    return data;
 	}
+	
+	private static byte[] addPadding(byte[] data) {
+		int length = data.length;
+		int padLength = 0;
+		if (length % 16 != 0 || length == 0) {
+			padLength = 16 - (length % 16);
+		}
+		byte[] afterPadding = new byte[length + padLength];
+		System.arraycopy(data, 0, afterPadding, 0, length);
+		for (int i = length; i < length+padLength; i++) {
+			afterPadding[i] = (byte) padLength;
+		}
+		return afterPadding;
+	}
+	
+	private static byte[] removePadding(byte[] data) {
+		
+		int length = data.length;
+		int padLength = (int) data[length - 1];
+		if (padLength > 16) return data;
+		byte[] afterRemoval = new byte[length - padLength];
+		boolean isPadded = true;
+		for (int i = length-1; i > length-padLength; i--) {
+			if (data[i] != padLength) {
+				isPadded = false;
+				break;
+			}
+		}
+		if (isPadded) System.arraycopy(data, 0, afterRemoval, 0, length-padLength);
+		
+		return afterRemoval;
+	}
+	
 }
